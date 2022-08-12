@@ -1,0 +1,4 @@
+source 'https://gems.ruby-china.com'
+group :development, :test do
+  gem 'rspec-rails', '>=2.13.1'
+end

@@ -90,7 +90,7 @@ MetaCommandResult DoMetaCommand(InputBuffer* buffer)
 
 ExecuteResult ExecuteInsert(Statement* statement, Table* table)
 {
-    if (table->num_rows > TABLE_MAX_ROW) {
+    if (table->num_rows >= TABLE_MAX_ROW) {
         return EXECUTE_TABLE_FULL;
     }
 
@@ -183,6 +183,7 @@ int main(int argc, char* argv[])
         case EXECUTE_TABLE_FULL:
             printf("Error: Table full.\n");
             break;
+
         }
     }
 
