@@ -18,10 +18,8 @@ typedef struct {
     void* pages[TABLE_MAX_PAGES];    
 } Table;
 
-// 序列化
 void SerializeRow(Row* source, void* destination);
 
-// 反序列化
 void DeserializeRow(void* source, Row* destination);
 
 void* RowSlot(Table* table, uint32_t row_num);

@@ -1,4 +1,4 @@
-# pytest配置文件,文件名必须为conftest.py
+# pytest鐨勯厤缃枃浠跺悕蹇呴』鏄痗onftest.py
 
 import pytest
 import subprocess
@@ -8,7 +8,6 @@ def pytest_addoption(parser):
 
 @pytest.fixture()
 def script_runner(pytestconfig):
-	# 从配置对象获取cmdopt的值
     cmdopt = pytestconfig.getoption("exec")
     p = subprocess.Popen(args=[cmdopt],  
     stdin=subprocess.PIPE, 

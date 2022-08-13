@@ -32,7 +32,6 @@ def test_insert(script_runner):
 
 def test_table_full(script_runner):
     s = "insert {n} user{n} person{n}@example.com"
-    # 左闭右开区间，需要插到最大值再多一个元素
     cmd = [s.format(n=i+1) for i in range (0, 1401)]
     cmd.append(".exit")
     out, err = script_runner.communicate(cmd_to_inst(cmd))

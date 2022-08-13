@@ -4,7 +4,6 @@
 cmake_minimum_required (VERSION 3.8)
 project ("SimpleDB")
 
-set(PYTEST /usr/local/bin/pytest)
 set(EXEC db)
 
 # 将源代码添加到此项目的可执行文件。
@@ -20,7 +19,7 @@ endif()
 enable_testing()
 add_test(
   NAME python_test
-  COMMAND ${PYTEST} -v ${CMAKE_CURRENT_SOURCE_DIR}/test/pytest/case.py --exec $<TARGET_FILE:${EXEC}>
+  COMMAND pytest -v ${CMAKE_CURRENT_SOURCE_DIR}/test/pytest/case.py --exec $<TARGET_FILE:${EXEC}>
   )
 
 # TODO: 如有需要，请添加测试并安装目标。

@@ -1,8 +1,7 @@
-﻿#include <stdio.h> 
+#include <stdio.h> 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>

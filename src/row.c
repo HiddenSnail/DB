@@ -1,6 +1,8 @@
 #include "row.h"
 
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const uint32_t ID_SIZE = size_of_attribute(Row, id);
 const uint32_t USERNAME_SIZE = size_of_attribute(Row, username);
@@ -55,7 +57,6 @@ Table* NewTable()
 
 void FreeTable(Table* table)
 {
-	// 可能是bug处,存在误释放的可能性
 	for (int i = 0; table->pages[i]; ++i) {
 		free(table->pages[i]);
 	}
