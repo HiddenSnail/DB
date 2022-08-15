@@ -7,7 +7,7 @@ def pytest_addoption(parser):
     parser.addoption("--exec", action="store", default="None", help="The path of test program")
 
 @pytest.fixture()
-def script_runner(pytestconfig):
+def cmd_runner(pytestconfig):
     cmdopt = pytestconfig.getoption("exec")
     p = subprocess.Popen(args=[cmdopt],  
     stdin=subprocess.PIPE, 
