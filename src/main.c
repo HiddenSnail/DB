@@ -85,7 +85,7 @@ MetaCommandResult DoMetaCommand(InputBuffer* buffer)
         exit(EXIT_SUCCESS);
     }
     else {
-        printf("Unrecognize command '%s'.\n", buffer->buffer);
+        return META_COMMAND_UNRECOGNIZED_COMMAND;
     }
 }
 
