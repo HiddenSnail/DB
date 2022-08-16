@@ -1,5 +1,7 @@
+import subprocess
 from subprocess import Popen
 from typing import List
+
 
 def cmd_to_inst(cmd:List[str], handle_last:bool = True) -> str:
     if handle_last == True:
@@ -12,37 +14,45 @@ def inst_to_cmd(inst:str) -> List[str]:
     cmd = inst.split("\n")
     return cmd
 
-def run_cmd(cmd_runner:Popen, cmd:List[str]) -> List[str]:
-    out, err = cmd_runner.communicate(cmd_to_inst(cmd))
+def running(program:str, cmd:List[str]) -> List[str]:
+    p = subprocess.Popen(args=[program, "test.db"],  
+    stdin=subprocess.PIPE, 
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True)
+    out, err = p.communicate(cmd_to_inst(cmd))
+    p.kill()
     return inst_to_cmd(out)
 
-def test_insert(cmd_runner):
+
+def test_insert(program):
     cmd = [
         "insert 1 user1 person1@example.com", 
         "select", 
         ".exit"
     ]
     expect = [
+        # 不理解输出的数据为什么会带db> 前缀
         "db> Executed.",
         "db> (1, user1, person1@example.com)",
         "Executed.",
         "db> "
     ]
 
-    output = run_cmd(cmd_runner, cmd)
+    output = running(program, cmd)
     assert output == expect
 
 
-def test_table_full(cmd_runner):
+def test_table_full(program):
     s = "insert {n} user{n} person{n}@example.com"
     cmd = [s.format(n=i+1) for i in range (0, 1401)]
     cmd.append(".exit")
-    output = run_cmd(cmd_runner, cmd)
+    output = running(program, cmd)
     expect = "db> Error: Table full."
     assert output[-2] == expect
 
 
-def test_insert_string_maximum_length(cmd_runner):
+def test_insert_string_maximum_length(program):
     long_username = 32 * "a"
     long_email = 255 * "a"
     
@@ -51,7 +61,7 @@ def test_insert_string_maximum_length(cmd_runner):
         "select",
         ".exit"
     ]
-    output = run_cmd(cmd_runner, cmd)
+    output = running(program, cmd)
 
     expect = [
         "db> Executed.",
@@ -62,7 +72,7 @@ def test_insert_string_maximum_length(cmd_runner):
     assert output == expect
 
 
-def test_print_error_massage_when_string_too_long(cmd_runner):
+def test_print_error_massage_when_string_too_long(program):
     long_username = 33 * "a"
     long_email = 256 * "a"
     cmd = [
@@ -75,26 +85,42 @@ def test_print_error_massage_when_string_too_long(cmd_runner):
         "db> Executed.",
         "db> "
     ]
-    output = run_cmd(cmd_runner, cmd)
+    output = running(program, cmd)
     assert output == expect
 
 
-def test_insert_nagative_id(cmd_runner):
-    cmd = [
+def test_insert_nagative_id(program):
+    assert running(program,  [
         "insert -1 cstack foo@bar.com",
         "select",
         ".exit"
-    ]
-    expect = [
+    ]) == [
         "db> ID must be positive.",
         "db> Executed.",
         "db> "
     ]
-    output = run_cmd(cmd_runner, cmd)
-    assert output == expect
 
 
+def test_persist_data(program):
+    # popen.communicate每个生成只能调用一次，而不能反复调用，可以考虑使用pexpect
+    assert running(program, [
+        "insert 1 user1 person1@example.com",
+        "insert 2 user2 person2@example.com",
+        ".exit"
+    ]) == [
+        "db> Executed.",
+        "db> Executed.",
+        "db> "
+    ]
 
-
+    assert running(program, [
+        "select",
+        ".exit"
+    ]) == [
+        "db> (1, user1, person1@example.com)",
+        "(2, user2, person2@example.com)",
+        "Executed.",
+        "db> "
+    ]
 
 

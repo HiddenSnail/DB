@@ -78,10 +78,10 @@ typedef struct {
 } Statement;
 
 
-MetaCommandResult DoMetaCommand(InputBuffer* buffer) 
+MetaCommandResult DoMetaCommand(InputBuffer* buffer, Table* table) 
 {
     if (strcmp(buffer->buffer, ".exit") == 0) {
-        DeleteInputBuffer(buffer);
+        DbClose(table);
         exit(EXIT_SUCCESS);
     }
     else {
@@ -172,14 +172,20 @@ PrepareResult PrepareStatement(InputBuffer* buffer, Statement* statement)
 
 int main(int argc, char* argv[]) 
 {
-    Table* table = NewTable();
+    if (argc < 2) {
+        printf("Must supply a database filename.\n");
+        exit(EXIT_FAILURE);
+    }
+    char* filename = argv[1];
+    Table* table = DbOpen(filename);
+
     InputBuffer* input_buffer = NewInputBuffer();
     while (true) {
         PrintPrompt();
         ReadInput(input_buffer);
 
         if (input_buffer->buffer[0] == '.') {
-            switch (DoMetaCommand(input_buffer)) {
+            switch (DoMetaCommand(input_buffer, table)) {
             case META_COMMAND_SUCCESS:
                 continue;
             case META_COMMAND_UNRECOGNIZED_COMMAND:
