@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #include "row.h"
+#include "cursor.h"
 
 extern const uint32_t TABLE_MAX_ROW;
 
@@ -96,18 +97,23 @@ ExecuteResult ExecuteInsert(Statement* statement, Table* table)
     }
 
     Row* row_to_insert = &(statement->row_to_insert);
-    SerializeRow(row_to_insert, RowSlot(table, table->num_rows));
+    Cursor* cursor = TableEnd(table);
+    SerializeRow(row_to_insert, CursorValue(cursor));
     table->num_rows += 1;
+    free(cursor);
     return EXECUTE_SUCCESS;
 }
 
 ExecuteResult ExecuteSelect(Statement* statement, Table* table)
 {
+    Cursor* cursor = TableStart(table);
     Row row;
-    for (uint32_t i = 0; i < table->num_rows; ++i) {
-        DeserializeRow(RowSlot(table, i), &row);
+    while (!(cursor->end_of_table)) {
+        DeserializeRow(CursorValue(cursor), &row);
         PrintRow(&row);
+        CursorAdvance(cursor);
     }
+    free(cursor);
     return EXECUTE_SUCCESS;
 }
 

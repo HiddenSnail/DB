@@ -1,7 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-#include "pager.h"
+#include "table.h"
+#include "cursor.h"
 
 #define COLUMN_USERNAME_SIZE 32
 #define COLUMN_EMAIL_SIZE 255
@@ -13,17 +14,11 @@ typedef struct {
     char email[COLUMN_EMAIL_SIZE + 1];
 } Row;
 
-typedef struct {
-    uint32_t num_rows;
-    Pager* pager;
-} Table;
-
-
 void SerializeRow(Row* source, void* destination);
 
 void DeserializeRow(void* source, Row* destination);
 
-void* RowSlot(Table* table, uint32_t row_num);
+void* CursorValue(Cursor* cursor);
 
 void PrintRow(Row* row);
 
