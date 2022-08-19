@@ -19,7 +19,7 @@ endif()
 enable_testing()
 add_test(
   NAME python_test
-  COMMAND pytest -v ${CMAKE_CURRENT_SOURCE_DIR}/test/pytest/case.py --exec $<TARGET_FILE:${EXEC}>
+  COMMAND pytest -vv ${CMAKE_CURRENT_SOURCE_DIR}/test/pytest/case.py --exec $<TARGET_FILE:${EXEC}>
   )
 
 # TODO: 如有需要，请添加测试并安装目标。

@@ -8,8 +8,7 @@
 
 #include "row.h"
 #include "cursor.h"
-
-extern const uint32_t TABLE_MAX_ROW;
+#include "btree.h"
 
 typedef struct {
     char* buffer;
@@ -78,12 +77,39 @@ typedef struct {
     Row row_to_insert;
 } Statement;
 
+void PrintConstants()
+{
+    printf("ROW_SIZE: %d\n", ROW_SIZE);
+    printf("COMMON_NODE_HEADER_SIZE: %d\n", COMMON_NODE_HEADER_SIZE);
+    printf("LEAF_NODE_HEADER_SIZE: %d\n", LEAF_NODE_HEADER_SIZE);
+    printf("LEAF_NODE_CELL_SIZE: %d\n", LEAF_NODE_CELL_SIZE);
+    printf("LEAF_NODE_CELL_SPACE_FOR_CELLS: %d\n", LEAF_NODE_CELL_SPACE_FOR_CELLS);
+    printf("LEAF_NODE_MAX_CELLS: %d\n", LEAF_NODE_MAX_CELLS);
+}
+
+void PrintLeafNode(void* node)
+{
+    uint32_t num_cells = *LeafNodeNumCells(node);
+    printf("leaf (size %d)\n", num_cells);
+    for (uint32_t i = 0; i < num_cells; ++i) {
+        uint32_t key = *LeafNodeKey(node, i);
+        printf("  - %d : %d\n", i, key);
+    }
+}
 
 MetaCommandResult DoMetaCommand(InputBuffer* buffer, Table* table) 
 {
     if (strcmp(buffer->buffer, ".exit") == 0) {
         DbClose(table);
         exit(EXIT_SUCCESS);
+    } else if (strcmp(buffer->buffer, ".constants") == 0) {
+        printf("Constants:\n");
+        PrintConstants();
+        return META_COMMAND_SUCCESS;
+    } else if (strcmp(buffer->buffer, ".btree") == 0) {
+        printf("Tree:\n");
+        PrintLeafNode(GetPage(table->pager, 0));
+        return META_COMMAND_SUCCESS;
     }
     else {
         return META_COMMAND_UNRECOGNIZED_COMMAND;
@@ -92,14 +118,14 @@ MetaCommandResult DoMetaCommand(InputBuffer* buffer, Table* table)
 
 ExecuteResult ExecuteInsert(Statement* statement, Table* table)
 {
-    if (table->num_rows >= TABLE_MAX_ROW) {
+    void* node = GetPage(table->pager, table->root_page_num);
+    if ((*LeafNodeNumCells(node) >= LEAF_NODE_MAX_CELLS)) {
         return EXECUTE_TABLE_FULL;
     }
 
     Row* row_to_insert = &(statement->row_to_insert);
     Cursor* cursor = TableEnd(table);
-    SerializeRow(row_to_insert, CursorValue(cursor));
-    table->num_rows += 1;
+    LeafNodeInsert(cursor, row_to_insert->id, row_to_insert);
     free(cursor);
     return EXECUTE_SUCCESS;
 }
@@ -174,7 +200,6 @@ PrepareResult PrepareStatement(InputBuffer* buffer, Statement* statement)
     }
     return PREPARE_UNRECOGNIZED_STATEMENT;
 }
-
 
 int main(int argc, char* argv[]) 
 {

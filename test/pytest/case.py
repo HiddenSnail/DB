@@ -32,7 +32,7 @@ def test_insert(program):
         ".exit"
     ]
     expect = [
-        # 不理解输出的数据为什么会带db> 前缀
+        # Q:不理解输出的数据为什么会带db> 前缀
         "db> Executed.",
         "db> (1, user1, person1@example.com)",
         "Executed.",
@@ -43,6 +43,10 @@ def test_insert(program):
     assert output == expect
 
 
+'''
+此用例在Part 8章节时，在插入第14行的时候就已经满了
+由于校验方式的原因，导致该用例依旧能够通过
+'''
 def test_table_full(program):
     s = "insert {n} user{n} person{n}@example.com"
     cmd = [s.format(n=i+1) for i in range (0, 1401)]
@@ -124,3 +128,39 @@ def test_persist_data(program):
     ]
 
 
+def test_print_constants(program):
+    assert running(program, [
+        ".constants",
+        ".exit"
+    ]) == [
+        "db> Constants:",
+        "ROW_SIZE: 293",
+        "COMMON_NODE_HEADER_SIZE: 6",
+        "LEAF_NODE_HEADER_SIZE: 10",
+        "LEAF_NODE_CELL_SIZE: 297",
+        "LEAF_NODE_CELL_SPACE_FOR_CELLS: 4086",
+        "LEAF_NODE_MAX_CELLS: 13",
+        "db> "
+    ]
+
+
+def test_print_btree(program):
+    cmd = []
+    for i in [3, 1, 2]:
+        cmd.append(f"insert {i} user{i} person{i}@example.com")
+    cmd.append(".btree")
+    cmd.append(".exit")
+
+    expect = [
+        "db> Executed.",
+        "db> Executed.",
+        "db> Executed.",
+        "db> Tree:",
+        "leaf (size 3)",
+        "  - 0 : 3",
+        "  - 1 : 1",
+        "  - 2 : 2",
+        "db> "
+    ]
+    output = running(program, cmd)
+    assert output == expect
