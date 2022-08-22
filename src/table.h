@@ -4,6 +4,6 @@
 #include "pager.h"
 
 typedef struct {
-    uint32_t root_page_num;
+    uint32_t root_page_num; // root page下标，从0开始
     Pager* pager;
 } Table;

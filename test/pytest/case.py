@@ -157,9 +157,27 @@ def test_print_btree(program):
         "db> Executed.",
         "db> Tree:",
         "leaf (size 3)",
-        "  - 0 : 3",
-        "  - 1 : 1",
-        "  - 2 : 2",
+        "  - 0 : 1",
+        "  - 1 : 2",
+        "  - 2 : 3",
+        "db> "
+    ]
+    output = running(program, cmd)
+    assert output == expect
+
+
+def test_duplicate_key(program):
+    cmd = [
+        "insert 1 user1 person1@example.com",
+        "insert 1 user1 person1@example.com",
+        "select",
+        ".exit"
+    ]
+    expect = [
+        "db> Executed.",
+        "db> Error: Duplicate key.",
+        "db> (1, user1, person1@example.com)",
+        "Executed.",
         "db> "
     ]
     output = running(program, cmd)

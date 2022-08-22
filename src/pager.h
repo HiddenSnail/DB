@@ -8,7 +8,7 @@
 typedef struct {
     int file_descriptor;
     uint32_t file_length;
-    uint32_t num_pages;
+    uint32_t num_pages; // 页数，从1开始计数
     void* pages[TABLE_MAX_PAGES];
 } Pager;
 

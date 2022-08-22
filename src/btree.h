@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include "row.h"
 #include "pager.h"
+#include "table.h"
+#include "cursor.h"
 
-typedef enum { NODE_INTERNAL, NODE_LEFT } NodeType;
+typedef enum { NODE_INTERNAL, NODE_LEAF } NodeType;
 
 // Common node header layout
 #define NODE_TYPE_SIZE (sizeof(uint8_t)) // 存储节点类型
@@ -45,3 +47,9 @@ void* LeafNodeValue(void* node, uint32_t cell_num);
 void InitializeLeafNode(void* node);
 
 void LeafNodeInsert(Cursor* cursor, uint32_t key, Row* value);
+
+Cursor* LeafNodeFind(Table* table, uint32_t page_num, uint32_t key);
+
+NodeType GetNodeType(void* node);
+
+void SetNodeType(void* node, NodeType type);
