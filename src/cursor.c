@@ -1,5 +1,6 @@
 #include "cursor.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "btree.h"
 
@@ -15,17 +16,17 @@ Cursor* TableStart(Table* table)
     return cursor;
 }
 
-Cursor* TableEnd(Table* table)
+Cursor* TableFind(Table* table, uint32_t key)
 {
-    Cursor* cursor = (Cursor*)malloc(sizeof(Cursor));
-    cursor->table = table;
-    cursor->page_num = table->root_page_num;
-    // Q:不理解为什么还是取root节点
-    void* root_node = GetPage(table->pager, table->root_page_num);
-    uint32_t num_cells = *LeafNodeNumCells(root_node);
-    cursor->cell_num = num_cells;
-    cursor->end_of_table = true;
-    return cursor;
+    uint32_t root_page_num = table->root_page_num;
+    void* root_node = GetPage(table->pager, root_page_num);
+
+    if (GetNodeType(root_node) == NODE_LEFT) {
+        return LeafNodeFind(table, root_page_num, key);
+    } else {
+        printf("Need to implement searching an internal node\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void* CursorValue(Cursor* cursor)

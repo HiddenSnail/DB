@@ -64,7 +64,8 @@ typedef enum {
 
 typedef enum {
     EXECUTE_SUCCESS,
-    EXECUTE_TABLE_FULL
+    EXECUTE_TABLE_FULL,
+    EXECUTE_DUPLICATE_KEY
 }ExecuteResult;
 
 typedef enum {
@@ -119,12 +120,21 @@ MetaCommandResult DoMetaCommand(InputBuffer* buffer, Table* table)
 ExecuteResult ExecuteInsert(Statement* statement, Table* table)
 {
     void* node = GetPage(table->pager, table->root_page_num);
-    if ((*LeafNodeNumCells(node) >= LEAF_NODE_MAX_CELLS)) {
+    uint32_t num_cells = *LeafNodeNumCells(node);
+    if (num_cells >= LEAF_NODE_MAX_CELLS) {
         return EXECUTE_TABLE_FULL;
     }
 
     Row* row_to_insert = &(statement->row_to_insert);
-    Cursor* cursor = TableEnd(table);
+    uint32_t key_to_insert = row_to_insert->id;
+    Cursor* cursor = TableFind(table, key_to_insert);
+    if (cursor->cell_num < num_cells) {
+        uint32_t key_at_index = *LeafNodeKey(node, cursor->cell_num);
+        if (key_at_index == key_to_insert) {
+            return EXECUTE_DUPLICATE_KEY;
+        }
+    }
+
     LeafNodeInsert(cursor, row_to_insert->id, row_to_insert);
     free(cursor);
     return EXECUTE_SUCCESS;

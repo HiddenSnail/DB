@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "row.h"
 #include "pager.h"
+#include "table.h"
+#include "cursor.h"
 
 typedef enum { NODE_INTERNAL, NODE_LEFT } NodeType;
 
@@ -45,3 +47,5 @@ void* LeafNodeValue(void* node, uint32_t cell_num);
 void InitializeLeafNode(void* node);
 
 void LeafNodeInsert(Cursor* cursor, uint32_t key, Row* value);
+
+Cursor* LeafNodeFind(Table* table, uint32_t page_num, uint32_t key);
